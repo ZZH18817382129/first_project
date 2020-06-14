@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.QuestionMapper">
+
+	<select id="selectAllQuestion" resultType="Question">
+		select * from question
+		limit #{offset}, #{size}
+	</select>
+	<select id="selectAllQuestionTopic" resultType="Topic">
+		select * from topic
+		limit #{offset}, #{size}
+	</select>
+	<select id="selectTotal" resultType="int">
+		select count(*) from question
+	</select>
+	<select id="selectTopicTotal" resultType="int">
+		select count(*) from topic
+	</select>
+	<select id="selectOne" resultType="ValueObject">
+		SELECT DISTINCT q.qno,q.qstem,it.ino,it.item,it.istatus
+		FROM question q,topic t,que_item qi,item it,que_to qt 
+		WHERE q.qno=qt.qno AND t.tono=qt.tono AND q.qno=qi.qno AND qi.ino=it.ino AND q.id=#{id}
+	</select>
+	<delete id="deleteMore">
+		delete from question where id in(${sid})
+	</delete>
+	<delete id="deleteOne">
+	delete from question where id=#{id}
+	</delete>
+    <update id="updateQuestion0" parameterType="ValueObject">
+	update item
+	<set>
+		<if test="q0.item != null and q0.item !=''">item=#{q0.item}</if>
+	</set>
+		where ino=#{q0.ino}
+	</update>
+	<update id="updateQuestion1" parameterType="ValueObject">
+	update item
+	<set>
+		<if test="q1.item != null and q1.item !=''">item=#{q1.item}</if>
+	</set>
+		where ino=#{q1.ino}
+	</update>
+	<update id="updateQuestion2" parameterType="ValueObject">
+	update item
+	<set>
+		<if test="q2.item != null and q2.item !=''">item=#{q2.item}</if>
+	</set>
+		where ino=#{q2.ino}
+	</update>
+	<update id="updateQuestion3" parameterType="ValueObject">
+	update item
+	<set>
+		<if test="q3.item != null and q3.item !=''">item=#{q3.item}</if>
+	</set>
+		where ino=#{q3.ino}
+	</update>
+	<update id="updateQstem" parameterType="ValueObject">
+	update question
+	<set>
+		<if test="q0.qstem != null and q0.qstem !=''">qstem=#{q0.qstem},</if>
+		<if test="q0.toname != null and q0.toname !=''">toname=#{q0.toname}</if>
+	</set>
+		where qno=#{q0.qno}
+	</update>
+	<!-- <update id="updateQtono" parameterType="ValueObject">
+	update que_to
+	<set>
+		<if test="q0.tono != null and q0.tono !=''">tono=#{q0.tono}</if>
+	</set>
+		where qno=#{q0.qno}
+	</update> -->
+	<update id="updateino0" parameterType="ValueObj2">
+	update item
+	<set>
+		istatus=0
+	</set>
+		where ino=#{vo0.ino0}
+	</update>
+	<update id="updateino1" parameterType="ValueObj2">
+	update item
+	<set>
+		istatus=0
+	</set>
+		where ino=#{vo1.ino1}
+	</update>
+	<update id="updateino2" parameterType="ValueObj2">
+	update item
+	<set>
+		istatus=0
+	</set>
+		where ino=#{vo2.ino2}
+	</update>
+	<update id="updateino3" parameterType="ValueObj2">
+	update item
+	<set>
+		istatus=0
+	</set>
+		where ino=#{vo3.ino3}
+	</update>
+	<update id="updateRino" parameterType="ValueObj2">
+	update item
+	<set>
+		istatus=1
+	</set>
+		where ino=#{voR.rino}
+	</update>
+	<select id="selectMaxItemId" resultType="int">
+		select MAX(id) from item
+	</select>
+	<select id="selectMaxQuesId" resultType="int">
+		select MAX(id) from question
+	</select>
+	<insert id="insertItem" parameterType="ValueObject"
+	>
+	insert into item(ino,item,istatus)
+	values(
+	#{vit.ino},
+	#{vit.item},
+	0
+	)
+	</insert>
+	<insert id="insertQi" parameterType="ValueObject"
+	>
+	insert into que_item(qno,ino)
+	values(
+	#{vqi.qno},
+	#{vqi.ino}
+	)
+	</insert>
+	<insert id="insertQstem" parameterType="ValueObject"
+	>
+	insert into question(qno,qstem,toname)
+	values(
+	#{vqstem.qno},
+	#{vqstem.qstem},
+	#{vqstem.toname}
+	)
+	</insert>
+	
+	<update id="updateStatus" parameterType="ValueObj2">
+	update item
+	<set>
+		istatus=1
+	</set>
+		where ino=#{vstatus.rino}
+	</update>
+	<select id="selectQuesion" resultType="Question">
+		select * from question where 1=1
+		<if test="q.qno != null and q.qno !=''">and qno like #{q.qno}</if>
+		<if test="q.qstem != null and q.qstem !=''">and qstem like #{q.qstem}</if>
+		<if test="q.toname != null and q.toname !=''">and toname like #{q.toname}</if>
+	</select>
+	<select id="selectTono" resultType="String">
+		select tono from topic where toname=#{toname}
+	</select>
+	<update id="updateChecked" parameterType="String">
+	update topic
+	<set>
+		LAY_CHECKED=#{lay}
+	</set>
+		where tono=#{t}
+	</update>
+	<update id="updateLayChecked" parameterType="int">
+	update topic
+	<set>
+		LAY_CHECKED = 0
+	</set>
+	</update>
+	<select id="selectTopics" resultType="Topic">
+		select * from topic where 1=1
+		<if test="t.toname != null and t.toname !=''">and toname like #{t.toname}</if>
+	</select>
+	<select id="selectTopicCheck" resultType="Topic">
+		SELECT toname,tono FROM topic WHERE LAY_CHECKED=1
+	</select>
+	<insert id="insertQueto" parameterType="String"
+	>
+	insert into que_to(qno,tono)
+	values(
+	#{q},
+	#{t}
+	)
+	</insert>
+	<select id="selectQue_toTono" resultType="String">
+		SELECT tono FROM que_to WHERE qno=#{q}
+	</select>
+	<update id="updateTopicChecked" parameterType="String">
+	update topic
+	<set>
+	LAY_CHECKED=1
+	</set>
+		where tono in(${to})
+	</update>
+	<delete id="deleteQue_to">
+		delete from que_to where qno=#{qno}
+	</delete>
+	<select id="selectQue_itemIno" resultType="String">
+		select ino from que_item where qno=#{qno}
+	</select>
+	<delete id="deleteOneitem">
+		delete from item where ino in(${ino})
+	</delete>
+	<delete id="deleteOneque_item">
+		delete from que_item where qno=#{qno}
+	</delete>
+	<delete id="deleteOneque_to">
+		delete from que_to where qno=#{qno}
+	</delete>
+	<select id="selectMoreQue_itemIno" resultType="String">
+		select ino from que_item where qno in(${qno})
+	</select>
+	<delete id="deleteMoreitem">
+		delete from item where ino in(${ino})
+	</delete>
+	<delete id="deleteMoreque_item">
+		delete from que_item where qno in(${qno})
+	</delete>
+	<delete id="deleteMoreque_to">
+		delete from que_to where qno in(${qno})
+	</delete>
+	<select id="selectItemid" resultType="int">
+		select count(*) from item
+	</select>
+	<insert id="insertItemid" parameterType="String"
+	>
+	insert into item(id)
+	values(1)
+	</insert>
+	<select id="selectQuestionCount" resultType="int">
+		select count(*) from question
+	</select>
+	<insert id="insertQuestionid" parameterType="String"
+	>
+	insert into question(id)
+	values(1)
+	</insert>
+	<delete id="deleteQuestionfirst">
+		delete from question where id=1
+	</delete>
+</mapper>

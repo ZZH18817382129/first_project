@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.UserMapper">
+	<!-- 根据用户输入的用户名密码,去数据库中查询是否有该用户,如果有且账号为可用状态则允许登录 -->
+	<select id="userLogin" resultType="User">
+		SELECT u.uno,u.password PASSWORD,r.ridentity identity,ustatus FROM USER u,role r,user_role ur 
+		WHERE u.uno=ur.uno AND r.id=ur.rid and u.uno=#{u.uno} and u.password=md5(#{u.password}) and ustatus=1
+	</select>
+	<!-- 查询身份信息 -->
+	<select id="selectPrivsByIden" resultType="Privilege">
+		SELECT * FROM priv WHERE id IN(SELECT pid FROM priv_role WHERE rid IN(SELECT id FROM role WHERE ridentity =#{identity}))
+	</select>
+	<!-- 查询所有用户的数量 -->
+	<select id="selectUsersCount" resultType="int">
+		select count(*) from user
+	</select>
+	<!-- 根据学生编号从数据库中查询该学生的所有考试 -->
+	<select id="selectExams" resultType="Exam">
+		SELECT e.eno,e.ename,e.etype,e.estarttime,e.eendtime,es.status estatus,tpno FROM exam e,exam_stu es WHERE e.eno=es.eno AND sno=#{sno} 
+		and e.estatus='待考' limit #{page},#{limit}
+	</select>
+	<!-- 根据试卷编号tpno从数据库中查询该试卷的试题列表 -->
+	<select id="selectQuesByTpno" resultType="Question">
+		select * from question where qno in(select qno from tp_que where tpno=#{tpno})
+	</select>
+	<!-- 根据题目编号qno从数据库中查询对应的选项列表 -->
+	<select id="selectItemsByQno" resultType="Item">
+		SELECT * FROM item WHERE ino IN(SELECT ino FROM que_item WHERE qno=#{qno})
+	</select>
+	<!-- 根据考试编号eno查询该次考试信息 -->
+	<select id="selectExamByEno" resultType="Exam">
+		select * from exam where eno=#{eno}
+	</select>
+	<!-- 根据题号qno查找试题信息 -->
+	<select id="selectQueByQno" resultType="Question">
+		select * from question where qno=#{qno}
+	</select>
+	<!-- 查询题号为qno的题目的正确答案 -->
+	<select id="selectRightItemByQno" resultType="Item">
+		SELECT qno,item FROM que_item q,item i WHERE q.ino=i.ino AND istatus=1 AND qno=#{qno}
+	</select>
+	<!-- 查询所有用户的登录信息 -->
+	<select id="selectAllUsers" resultType="User">
+		 SELECT distinct u.id,u.uno,u.password password,r.ridentity identity,IF(ustatus=1,'可用','禁用') ustatus,utime FROM USER u,role r,user_role ur WHERE u.uno=ur.uno AND r.id=ur.rid and ridentity!='学生' LIMIT #{offset},#{limit}
+	</select>
+	<!-- 查询用户名和工号 -->
+	<select id="selectUserMsg" resultType="User">
+		SELECT * from user
+	</select>
+	<select id="selectUserByUnoIden" resultType="User">
+		SELECT * FROM USER WHERE uno IN(SELECT uno FROM user_role WHERE rid=(select id from role where ridentity=#{identity})) AND uno=#{uno}
+	</select>
+	<!--  -->
+	<select id="selectTempUsers" resultType="User">
+		SELECT DISTINCT u.uno uno,PASSWORD FROM user_role ur,role r,USER u WHERE r.id NOT IN(#{rid}) AND r.id=ur.rid AND u.uno=ur.uno AND r.id=ur.rid
+	</select>
+	<!--  -->
+	<select id="selectAllRoles" resultType="Role">
+		select * from role;
+	</select>
+	<!--  -->
+	<select id="selectAllPrivs" resultType="Privilege">
+		select * from priv
+	</select>
+	<select id="selectPidsByRid" resultType="int">
+		select pid from priv_role where rid=#{rid}
+	</select>
+	<!--  -->
+	<select id="selectIdenByRid" resultType="String">
+		select ridentity from role where id=#{rid}
+	</select>
+	<!--  -->
+	<select id="selectRidByIden" resultType="int">
+		select id from role where ridentity=#{identity}
+	</select>
+	<!--  -->
+	<select id="selectUserByRid" resultType="int">
+		select count(*) from user_role where uno=#{uno} and rid=#{rid}
+	</select>
+	<!--  -->
+	<select id="selectUserByUno" resultType="User">
+		select  * from user where uno=#{uno}
+	</select>
+	<!--  -->
+	<select id="selectRitemByQno" resultType="String">
+		select item from item where ino in(select ino from que_item where qno=#{qno}) and istatus='1' 
+	</select>
+	<!--  -->
+	<select id="selectESQ" resultType="int">
+		select count(*) from exam_stu_que where eno=#{eno} and qno=#{qno} and sno=#{sno}
+	</select>
+	<!--  -->
+	<select id="selectSnameBySno" resultType="String">
+		select sname from student where sno=#{sno}
+	</select>
+	<!--  -->
+	<select id="selectEndTime" resultType="String">
+		select esendtime from exam_stu where sno=#{sno} and eno=#{eno}
+	</select>
+	<!--  -->
+	<update id="updateESQ">
+		update exam_stu_que set sitem=#{sitem} where eno=#{eno} and qno=#{qno} and sno=#{sno}
+	</update>
+	<!--  -->
+	<insert id="addUserRole">
+		insert into user_role(uno,rid,ustatus) values(#{uno},#{rid},1)
+	</insert>
+	<!-- 插入一条考试题信息 -->
+	<insert id="insertESQ">
+		insert into exam_stu_que (eno,sno,qno,ritem,sitem)values(#{eno},#{sno},#{qno},#{ritem},#{sitem})
+	</insert>
+	<!-- 向user表中添加数据 -->
+	<insert id="insertUser">
+		insert into user (uno,password,utime) values(#{uno},md5('123456'),#{utime})
+	</insert>
+	<!-- 向用户-角色关联表中添加数据 -->
+	<insert id="insertUserIden">
+		insert into user_role (uno,rid,ustatus) values(#{uno},#{rid},'1')
+	</insert>
+	<!--  -->
+	<insert id="insertPrivRole">
+		insert into priv_role(pid,rid) values(#{pid},#{rid})
+	</insert>
+	<!--  -->
+	<insert id="insertDiary">
+		insert into diary(uno,message,time) values(#{uno},#{message},#{time})
+	</insert>
+	<!--  -->
+	<insert id="insertRole">
+		insert into role(ridentity) values(#{ridentity})
+	</insert>
+	<!-- 从数据库中批量删除用户 -->
+	<delete id="deleteUser" parameterType="java.lang.String">
+		DELETE FROM USER WHERE uno IN(${ids})
+	</delete>
+	<!-- 从关联表中批量删除用户 -->
+	<delete id="deleteUserRole" parameterType="java.lang.String">
+		DELETE FROM user_role WHERE uno IN(${ids})
+	</delete>
+	<!--  -->
+	<delete id="removeUser">
+		delete from user_role where uno=#{uno} and rid=(SELECT id FROM role WHERE ridentity=#{identity})
+	</delete>
+	<!--  -->
+	<delete id="deleteUserRoles">
+		delete from user_role where uno in(${unos}) and rid=#{id}
+	</delete>
+	<!--  -->
+	<delete id="deletePrivRoleByRid">
+		delete from priv_role where rid=#{rid}
+	</delete>
+	<!--  -->
+	<update id="updateUser">
+		update user_role set rid=#{rid} where uno=#{uno}
+	</update>
+	<update id="updateUserRole" parameterType="User">
+		UPDATE user_role SET rid=(SELECT id FROM role WHERE ridentity=#{u.identity}) WHERE uno=#{u.uno}
+	</update>
+	<!--  -->
+	<update id="updateRoleStatusDisable">
+		update user_role set ustatus=0 where rid=#{rid}
+	</update>
+	<update id="updateRoleStatusAble">
+		update user_role set ustatus=1 where rid=#{rid}
+	</update>
+	<update id="updateUserAble">
+		UPDATE user_role SET ustatus=1 WHERE rid in(SELECT id FROM role WHERE ridentity=#{ridentity}) and uno=#{uno}
+	</update>
+	<!--  -->
+	<update id="updateUserDisable">
+		UPDATE user_role SET ustatus=0 WHERE rid in(SELECT id FROM role WHERE ridentity=#{ridentity}) and uno=#{uno}
+	</update>
+	<!--  -->
+	<update id="updateUserPwd">
+		update user set password=md5('123456') where uno in(${uno})
+	</update>
+	<!--  -->
+	<update id="updateExamStu">
+		update exam_stu set esstarttime=#{now_time},esendtime=#{end_time} where sno=#{sno} and eno=#{eno}
+	</update>
+	<!--  -->
+	<update id="updateExamStuStatus">
+		update exam_stu set esgrade=#{esgrade},status='已完成' where sno=#{sno} and eno=#{eno}
+	</update>
+</mapper>

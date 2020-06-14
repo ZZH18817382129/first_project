@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.TopicMapper">
+	<!-- 从表topic查找每页限定的数量 -->
+	<select id="selectByPage" resultType="Topic">
+		select * from topic limit
+		#{offset},#{limit}
+	</select>
+	<!-- 从topic表列出tomodule的所有不重复项 -->
+	<select id="listTomo" resultType="java.lang.String">
+		SELECT DISTINCT tomodule FROM
+		topic
+	</select>
+	<!-- 从topic表中查出所有项的数目 -->
+	<select id="selectTotal" resultType="int">
+		select count(*) from topic;
+	</select>
+	<!-- 从topic表中通过id删除一个知识点 -->
+	<delete id="deleteOne" parameterType="int">
+		delete from topic where
+		id=#{id}
+	</delete>
+	<!-- 修改topic表 -->
+	<update id="updateOne" parameterType="Topic">
+		update topic
+		<set>
+			<if test="o.toname!=null and o.toname!=''">toname=#{o.toname},</if>
+			<if test="o.tono!=null and o.tono!=''">tono=#{o.tono},</if>
+			<if test="o.tolevel!=null and o.tolevel!=''">tolevel=#{o.tolevel},</if>
+			<if test="o.tostage!=null and o.tostage!=''">tostage=#{o.tostage},</if>
+			<if test="o.tomodule!=null and o.tomodule!=''">tomodule=#{o.tomodule}</if>
+		</set>
+		where id=#{o.id}
+	</update>
+	<!-- 查询一个知识点 -->
+	<select id="selectOne" resultType="Topic">
+		select*from topic where
+		id=#{id}
+	</select>
+	<!-- 查出编号id最大值 -->
+	<select id="showmaxValue" resultType="int">
+		select MAX(id) from topic
+	</select>
+	<!-- 插入一个知识点 -->
+	<insert id="insertOne" parameterType="Topic">
+		insert into
+		topic(toname,tono,tolevel,tostage,tomodule) values
+		(#{t.toname},#{t.tono},#{t.tolevel},#{t.tostage},#{t.tomodule})
+	</insert>
+	<!-- 验证并得到查询结果 -->
+	<select id="selectone" resultType="Topic">
+		<!-- select * from topic where 1=1 toname = #{a.toname} and tono= #{a.tono} 
+			and a.toname!= /^[^\d_]{1}[a-zA-Z\d_\u4e00-\u9fa5]{1,13}[^_]{1}$/ -->
+		select * from topic where 1=1
+		<if test="a.toname!=null and a.toname!=''"> and toname=#{a.toname}</if>
+		<if test="a.tono!=null and a.tono!=''"> and tono=#{a.tono}</if>
+		<if test="a.tolevel!=null and a.tolevel!='' "> and tolevel=#{a.tolevel}</if>
+		<if test="a.tostage!=null and a.tostage!=''"> and tostage=#{a.tostage}</if>
+		<if test="a.tomodule!=null and a.tomodule!=''"> and tomodule=#{a.tomodule}</if>
+	</select>
+	<delete id="deltopic" parameterType="String">
+		delete from topic where id
+		in (${sid})
+	</delete>
+	<!-- 查询数据库中有没已经存在的知识点 -->
+	<select id="selectToname" resultType="int">
+		select count(*) from topic where toname=#{t.toname}
+	</select>
+</mapper>

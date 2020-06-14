@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.TestPaperMapper">
+    <!--遍历试卷-->
+	<select id="findtp" parameterType="TestPaper" resultType="TestPaper">
+		select * from testpaper  order by tpno desc limit  #{page},#{limit}
+	</select>
+	
+	 <select id="totalrowtp" resultType="int">
+        select count(*) from testpaper 
+    </select>
+	
+	<!--遍历题库-->
+	<select id="findquestion"  resultType="Question">
+	select * from question 
+	<if test="toname != null and toname !=''">q,que_to qt,topic t where q.qno=qt.qno and t.tono=qt.tono and toname=#{toname} </if>
+	limit #{page},#{limit}
+	</select>
+	
+	<select id="totalrowques" resultType="int">
+        select count(*) from question 
+    </select>
+	<!--通过qno查询试题集合_添加用-->
+	<select id="selectquestion" parameterType="String" resultType="Question">
+	select * from question where qno in (${ids})
+    </select>
+    <!-- 修改试卷试题关联表 -->
+    <update id="modifyTpQue" >
+    update tp_que set LAY_CHECKED = 'true' where qno = #{qno} and tpno = #{tpno}
+    </update>
+    <update id="modifytpQue1">
+     update tp_que set LAY_CHECKED = 'false' where qno = #{qno} and tpno = #{tpno}
+    </update>
+    
+    <!-- 删除试卷试题关联表 -->
+    <delete id="removetpque">
+     delete from tp_que where tpno = #{tpno} and LAY_CHECKED = 'false'
+    </delete>
+    <!--  -->
+    <select id="findquestionByTono" resultType="Question">
+    	select * from question where qno in(select qno from que_to where tono=#{tono}) and qno not in(select qno from tp_que where tpno!=#{tpno})
+   	</select>
+   	<!-- checkbox -->
+   	<select id="questionlistLC" resultType="Question">
+   		select distinct q.*,tq.LAY_CHECKED from question q,tp_que tq where q.qno=tq.qno and tpno=#{tpno} limit #{offset},#{limit}
+   	</select>
+   	<select id="questionlistLC1" resultType="Question">
+   		select distinct q.*,tq.LAY_CHECKED from question q,tp_que tq,topic t,que_to qt 
+   		where q.qno=tq.qno and t.tono=qt.tono and q.qno=qt.qno and tpno=#{tpno} and toname=#{toname} limit #{page},#{limit}
+   	</select>
+   	<!--  -->
+   	<select id="searchQuesNumByTpno" resultType="int">
+   		select count(*) from tp_que where LAY_CHECKED='true' and tpno=#{tpno}
+   	</select>
+    <!--单试卷删除-->
+	<delete id="deltpone"> 
+	   delete from testpaper where tpno = #{tpno} 
+	</delete>
+	
+	<delete id="deltponetpque">
+	   delete from tp_que where tpno = #{tpno}
+	</delete>
+	
+	<!--多试卷删除-->
+	<delete id="deletetptp">
+	   delete from testpaper where tpno in(${tpno}) 
+	</delete>
+	
+	<delete id="deletetpques">
+	   delete from tp_que where tpno in (${tpno})
+	</delete>
+	
+	<!--添加试卷基本信息-->
+	<insert id="addtestpaper" useGeneratedKeys="true" >
+		insert into testpaper (tpno,tpname,tpteacher,disable)
+		 values(
+		#{tpno},
+		#{pname},
+		#{pman},
+		'0'
+		)
+	</insert>
+	<!-- 添加是试卷前验证 -->
+	<select id="selecttpname" parameterType="String" resultType="TestPaper">
+	 select * from testpaper where tpname = #{pname}
+	</select>
+	<!--添加试卷试题-->
+	<insert id="addquestion" >
+        insert into tp_que(tpno,qno) values
+        <foreach collection="tpque" item="que" separator="," close=";">
+            (#{tpno},#{que.qno})
+        </foreach>
+       
+    </insert>
+    <!-- 添加试卷试题 checked -->
+    <insert id="addTpQue">
+    	insert into tp_que (tpno,qno,LAY_CHECKED) values(#{tpno},#{qno},'false')
+    </insert>
+    <!-- 删除试卷试题  checked-->
+    <delete id="removetestpaperquestion">
+        delete from tp_que where tpno = #{tpno} and qno = #{qno}
+    </delete>
+    <!--遍历试卷试题-->
+	<select id="tpselquestion" parameterType="String" resultType="Question">
+	select q.* from tp_que t inner join question q on q.qno = t.qno
+	where tpno = #{tpno}
+	</select>
+	
+	<!--查询试卷基本信息-->
+	<select id="findtestpaper" parameterType="String" resultType="TestPaper">
+	 select * from testpaper where tpno = #{tpno}
+	</select>
+	
+	<!--查询试卷试题 _修改用-->
+	<select id="findque"  resultType="Question">
+	 select q.* from tp_que t inner join question q on q.qno = t.qno
+	where tpno = #{tpno}
+	</select>
+	
+	<!--更改试卷基本信息-->
+	<update id="updatetp" >
+	  update testpaper
+	  set  
+	  tpname = #{pname} ,
+	  tpteacher = #{pman}
+	  where 
+	  tpno = #{tpno}
+	</update>
+	
+	<!--试卷条件查询-->
+	<select id="selecttes" resultType="TestPaper" parameterType="TestPaper" >
+		select * from testpaper where 1=1
+		<if test="tp.tpname != null and tp.tpname !=''">and tpname like #{tp.tpname}</if>
+		<if test="tp.tpteacher != null and tp.tpteacher !=''">and tpteacher like #{tp.tpteacher}</if>
+	</select>
+	
+	<!--试题条件查询-->
+	<select id="selectques" resultType="Question" >
+		SELECT * from question where qno in(select qno from que_to where tono in(select tono from topic where 1=1
+		<if test="toname != null and toname !=''">and toname like #{toname}</if>
+		 ))
+	</select>
+	
+	<!--添加前查詢知識點-->
+	<select id="beforlisttopic" resultType="Topic">
+	 select * from topic
+	</select>
+	<!--查询最大ID-->   
+	<select id="selectmaxtp" resultType="int">
+		select MAX(id) from testpaper
+	</select>
+	
+	<!--查询课程列表--> 
+	<select id="listmajor1" resultType="Major">
+	    select * from major
+	</select>
+	<!--穿梭框遍例試題-->
+	<select id="findquestion1" parameterType="Question" resultType="Question">
+	select * from question 
+	</select>
+	
+	<!--试题管理穿梭框初始右测数据--> 
+	<select id="findlisttpque" parameterType="String" resultType="String">
+	    select qno from tp_que where tpno =#{tpno}
+	</select>
+	<!--穿梭框添加前删除-->
+	<delete id="trdeltpque">
+      delete from tp_que where tpno = #{tpno}
+    </delete>
+    
+	<!--穿梭框删除前查询-->
+	<select id="trseltpque" resultType="Question">
+	  select q.* from tp_que t inner join question q on t.qno = q.qno where tpno = #{tpno} 
+	</select>
+	<!--穿梭框添加前查询-->
+	 <select id="trfindquestion" resultType="Question">   
+	  select * from question where qno in(${tpno1})
+	 </select>
+	<!--添加穿梭框保存数据-->
+	<insert id="traddquetp">
+    insert into tp_que (tpno,qno)
+    values
+    <foreach collection="top" item="q" separator="," close=";">
+            (#{tpno},#{q.qno})
+    </foreach>
+    </insert>
+    <!--  -->
+    <select id="selectTpnoQno" resultType="int">
+    	select count(*) from tp_que where qno=#{qno} and tpno=#{tpno}
+    </select>
+    <!--禁用试卷-->
+    <update id="modifytpdisable">
+     update testpaper set disable = '1' where tpno = #{tpno}
+    </update>
+    <!-- 激活试卷 -->
+    <update id="modifytpstart">
+      update testpaper set disable = '0' where tpno = #{tpno}
+    </update>
+</mapper>

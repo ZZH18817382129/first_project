@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.RoleMapper"> <!-- 跟Dao接口全限定名保持一致 -->
+	<select id="RoleByPage" resultType="Role">
+		select * from role limit
+		#{offset},#{limit}
+	</select>
+	<select id="RoleTotal" resultType="int">
+		select count(*) from
+		role;
+	</select>
+	<delete id="dellotsRole" parameterType="String">
+		delete from role where id
+		in (${sid})
+	</delete>
+	<delete id="dellotsRoleOne" parameterType="int">
+		delete from role where
+		id =#{id}
+	</delete>
+	<select id="selectRoleOne" resultType="Role">
+		select * from role where
+		id=#{id}
+	</select>
+	<update id="UpdRoleOne" parameterType="Role">
+		Update role
+		<set>
+			<if test="o.ridentity != null and o.ridentity !=''">ridentity=#{o.ridentity},</if>
+		</set>
+		where id=#{o.id}
+	</update>
+	<insert id="insertOnerole" parameterType="Role">
+		insert into
+		role(ridentity) values
+		(#{t.ridentity})
+	</insert>
+	<!--  -->
+	<select id="selectRoleByIden" resultType="Role">
+		select * from role where ridentity=#{ridentity}
+	</select>
+</mapper>

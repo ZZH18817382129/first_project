@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.JiLuMapper">
+	<select id="selectAllExams" resultType="Exam">
+		select * from exam
+	</select>
+	<select id="selectQuesByTpno" resultType="Question">
+		select * from question where qno in(select qno from tp_que where tpno=#{tpno})
+	</select>
+	<select id="selectItemsByQno" resultType="Item">
+		select * from item where ino in(select ino from que_item where qno=#{qno})
+	</select>
+	<select id="selectcorrect" resultType="int">
+		select count(*) from exam_stu_que where ritem=sitem and qno=#{qno} and eno=#{eno}
+	</select>
+	<select id="selectincorrect" resultType="int">
+		select count(*) from exam_stu_que where ritem!=sitem and qno=#{qno} and eno=#{eno}
+	</select>
+	<select id="selectRitem" resultType="String">
+		select item from item where ino in(select ino from que_item where qno=#{qno}) and istatus='1'
+	</select>
+	<select id="selectCheckThis" resultType="int">
+		select count(*) from exam_stu_que where eno=#{eno} and qno=#{qno} and sitem=#{item}	
+	</select>
+</mapper>

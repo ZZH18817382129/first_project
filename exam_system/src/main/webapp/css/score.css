@@ -1,0 +1,28 @@
+@charset "UTF-8";
+body {
+	font-family: Helvetica Neue, Helvetica PingFang SC, Tahoma, Arial,
+		sans_serif;
+}
+*{
+	margin:0;
+	padding:0;
+}
+.chaxun1{
+	float:right;
+	margin-right:550px;
+}
+body {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+.layui-footer{
+	text-align:center;
+	margin-top:600px;
+}
+#xs{
+	margin-top:15px;
+	margin-bottom:15px;
+}
+#jl{
+	margin-left:20px;
+}

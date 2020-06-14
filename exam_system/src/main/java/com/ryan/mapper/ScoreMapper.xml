@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.ScoreMapper">
+	<select id="selectByPage" resultType="Score">
+		select c.cname,es.esgrade
+		,s.sname,s.sno,e.ename tpname from classes c,exam_stu
+		es,student s,testpaper
+		tp,exam e where c.cname=s.sclass and
+		e.tpno=tp.tpno and es.eno=e.eno
+		and es.sno=s.sno limit
+		#{offset},#{limit}
+	</select>
+	<select id="selectTotal" resultType="int">
+		select
+		count(esgrade)
+		from
+		exam_stu;
+	</select>
+	<select id="selectone" resultType="Score">
+		<!-- select cname,sname,student.sno,tpname,esgrade from classes,student,testpaper,exam_stu 
+			where student.id = exam_stu.id and exam_stu.id = classes.id and classes.id 
+			= testpaper.id; </select> -->
+		select c.cname,es.esgrade ,s.sname,s.sno,e.ename tpname from classes
+		c,exam_stu
+		es,student s,testpaper tp,exam e where c.cname=s.sclass and
+		e.tpno=tp.tpno and es.eno=e.eno and es.sno=s.sno and 1=1
+		<if test="s.cname!=null and s.cname!='' "> and c.cname=#{s.cname}</if>
+		<if test="s.esgrade!=null and s.esgrade!=''"> and es.esgrade=#{s.esgrade}</if>
+		<if test="s.sname!=null and s.sname!='' "> and s.sname=#{s.sname}</if>
+		<if test="s.sno!=null and s.sno!=''"> and s.sno=#{s.sno}</if>
+		<if test="s.tpname!=null and s.tpname!=''"> and e.ename=#{s.tpname}</if>
+	</select>
+	<update id="updateOne">
+		update exam_stu
+		<set>
+			<if test="esgrade!=null and esgrade!=''">esgrade=#{esgrade}</if>
+		</set>
+		where sno=#{sno} and eno in(select eno from exam where ename=#{ename})
+	</update>
+	<!-- update classes,exam_stu,student,testpaper,exam <set> <if test="o.cname!=null 
+		and o.cname!=''">cname=#{o.cname},</if> <if test="o.esgrade!=null and o.esgrade!=''">esgrade=#{o.esgrade},</if> 
+		<if test="o.sname!=null and o.sname!=''">sname=#{o.sname},</if> <if test="o.sno!=null 
+		and o.sno!=''">sno=#{o.sno},</if> <if test="o.tpname!=null and o.tpname!=''">tpname=#{o.tpname}</if> 
+		</set> where id=#{o.id} -->
+
+	<select id="selectscore" resultType="Score">
+		SELECT DISTINCT c.cname
+		,s.sname,s.sno,e.ename tpname,es.esgrade FROM classes c,exam_stu
+		es,student
+		s,exam e WHERE s.sclass=c.cname AND es.sno=s.sno AND
+		e.eno=es.eno AND s.sno = #{sno} and e.ename=#{ename}
+	</select>
+</mapper>

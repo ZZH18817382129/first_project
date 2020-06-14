@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.StudentMapper">
+	<select id="selectByPage" resultType="Student">
+		select * from student limit
+		#{pagess},#{limit}
+	</select>
+	<select id="selectTotal" resultType="int">
+		select count(*) from student;
+	</select>
+	<delete id="deleteOne" parameterType="int">
+		delete from student where id=#{id}
+	</delete>
+	<delete id="deleteById" parameterType="Student">
+	delete from student where id in (${sid})
+	</delete>
+	
+	<select id="selectOne" resultType="Student">
+		select * from student where id=#{id}
+	</select>
+	<update id="updateOne" parameterType="Student">
+		update student
+		<set>
+			<if test="s.sphone != null and s.sphone !=''">sphone=#{s.sphone},</if>
+			<if test="s.sclass != null and s.sclass !=''">sclass=#{s.sclass},</if>
+			<if test="s.sschool != null and s.sschool !=''">sschool=#{s.sschool},</if>
+			<if test="s.smajor != null and s.smajor !=''">smajor=#{s.smajor},</if>
+		</set>
+		where id=#{s.id}
+	</update>
+	
+	<insert id="insertStudent" parameterType="Student">
+		insert into
+		student(sname,sphone,sclass,sgender,sno,sschool,smajor) values
+		(#{s.sname},#{s.sphone},#{s.sclass},#{s.sgender},#{s.sno},#{s.sschool},#{s.smajor})
+	</insert>
+	<select id="selectStus" resultType="Student">
+		select * from student where 1=1
+		<if test="s.sname != null and s.sname !=''">and sname like #{s.sname}</if>
+		<if test="s.sno != null and s.sno !=''">and sno like #{s.sno}</if>
+		<if test="s.sclass != null and s.sclass !=''">and sclass like #{s.sclass}</if>
+		<if test="s.sschool != null and s.sschool !=''">and sschool like #{s.sschool}</if>
+	</select>
+	
+	 <!--查询最大id-->
+    <select id="selectMaxStuId" resultType="int">
+    select MAX(id) from student
+    </select>
+    
+    <select id="selectClasses" resultType="Classes">
+		SELECT * FROM classes
+	</select>
+	<update id="updateStime">
+		update student set stime=#{stime} where sno=#{sno}
+	</update>
+</mapper>

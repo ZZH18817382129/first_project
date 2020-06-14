@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.ClassesMapper">
+
+	<select id="selectAllClasses" resultType="Classes">
+		select * from classes order by ctime desc
+		limit #{offset}, #{size}
+	</select>
+	<select id="selectTotal" resultType="int">
+		select count(*) from classes
+	</select>
+	<select id="selectOne" resultType="Classes">
+		select * from classes where id=#{id}
+	</select>
+	<delete id="deleteMore">
+		delete from classes where id in(${sid})
+	</delete>
+	<delete id="deleteOne">
+	delete from classes where id=#{id}
+	</delete>
+	<update id="updateOne" parameterType="Classes">
+	update classes
+	<set>
+		<if test="c.cname != null and c.cname !=''">cname=#{c.cname},</if>
+		<if test="c.ctime != null and c.ctime !=''">ctime=#{c.ctime},</if>
+		<if test="c.cnum != null and c.cnum !=''">cnum=#{c.cnum},</if>
+		<if test="c.cadviser != null and c.cadviser !=''">cadviser=#{c.cadviser},</if>
+		<if test="c.cteacher != null and c.cteacher !=''">cteacher=#{c.cteacher}</if>
+	</set>
+		where id=#{c.id}
+	</update>
+	<insert id="insertClass" parameterType="Classes"
+	useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+	insert into classes(cno,cname,ctime,cnum,cadviser,cteacher)
+	values(
+	#{c.cno},
+	#{c.cname},
+	#{c.ctime},
+	#{c.cnum},
+	#{c.cadviser},
+	#{c.cteacher}
+	)
+	</insert>
+	
+	<select id="selectClass" resultType="Classes">
+		select * from classes where 1=1
+		<if test="c.cname != null and c.cname !=''">and cname like #{c.cname}</if>
+		<if test="c.cadviser != null and c.cadviser !=''">and cadviser like #{c.cadviser}</if>
+		<if test="c.cteacher != null and c.cteacher !=''">and cteacher like #{c.cteacher}</if>
+	</select>
+	<select id="selectTeacher" resultType="Teacher">
+	    SELECT * FROM teacher
+	</select>
+	<select id="selectMaxClassId" resultType="int">
+		select MAX(id) from classes
+	</select>
+	<select id="selectCnames" resultType="int">
+    SELECT COUNT(*) FROM classes WHERE cname=#{c.cname}
+    </select>
+    <select id="selectClassCount" resultType="int">
+	    select count(*) from classes
+	</select>
+	<insert id="insertClassid" parameterType="String"
+	>
+	insert into classes(id)
+	values(1)
+	</insert>
+	<delete id="deleteClassfirst">
+		delete from classes where id=1
+	</delete>
+</mapper>

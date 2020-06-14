@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.ExamMapper">
+	<select id="selectByPage" resultType="Exam">
+		SELECT e.id,e.eno,e.ename,e.etype,e.estarttime,e.eendtime, t.tname etno,e.estatus,tpname tpno FROM exam e,testpaper tp,teacher t WHERE tp.tpno=e.tpno AND t.tno=e.etno ORDER BY e.id DESC
+        limit #{offset},#{limit}
+	</select>
+	<select id="selectTotal" resultType="int">
+		select count(*) from exam;
+	</select>
+
+	<delete id="deleteOne" parameterType="int">
+		delete from exam where
+		id=#{id}
+	</delete>
+	<delete id="deleteById">
+		delete from exam where id in(${sid})
+	</delete>
+
+	<select id="selectOne" resultType="Exam">
+		select * from exam where
+		id=#{id}
+	</select>
+	<update id="updateOne" parameterType="Exam">
+		update exam
+		<set>
+			<if test="e.ename != null and e.ename !=''">ename=#{e.ename},</if>
+			<if test="e.estarttime != null and e.estarttime !=''">estarttime=#{e.estarttime},</if>
+			<if test="e.eendtime != null and e.eendtime !=''">eendtime=#{e.eendtime},</if>
+			<if test="e.etno != null and e.etno !=''">etno=#{e.etno},</if>
+		</set>
+		where id=#{e.id}
+	</update>
+
+	<select id="selectByTest" resultType="TestPaper">
+		select * from testpaper
+		limit
+		#{offset},#{limit}
+	</select>
+	<select id="selectTot" resultType="int">
+		select count(*) from
+		testpaper;
+	</select>
+	<select id="selectExams" resultType="Exam">
+		select * from exam where 1=1
+		<if test="e.ename != null and e.ename !=''">and ename like #{e.ename}</if>
+		<if
+			test="e.estarttime != null and e.estarttime !='' and e.eendtime != null and e.eendtime !=''">
+			and estarttime between #{e.estarttime} and #{e.eendtime}
+		</if>
+		<if test="e.etype != null and e.etype !=''">and etype=#{e.etype}</if>
+		<if test="e.eno != null and e.eno !=''">and eno like #{e.eno}</if>
+	</select>
+
+	<insert id="insertExam" parameterType="Exam">
+		insert into
+		exam(eno,ename,etype,estarttime,eendtime,estatus,tpno) values
+		(${e.eno},#{e.ename},#{e.etype},#{e.estarttime},#{e.eendtime},#{e.estatus},#{e.tpno})
+	</insert>
+
+	<select id="selectTests" resultType="TestPaper">
+		select * from testpaper where 1=1
+		<if test="t.tpname != null and t.tpname !=''">and tpname like #{t.tpname}</if>
+	</select>
+
+	<select id="selectByClass" resultType="Classes">
+		select * from classes
+		limit
+		#{offset},#{limit}
+	</select>
+	<select id="selectTotalRows" resultType="int">
+		select count(*) from
+		classes;
+	</select>
+	<!-- <select id="selectCla" parameterType="String" resultType="Classes"> 
+		select * from classes where cno in (${cnos}) </select> <insert id="insertExamCla"> 
+		insert into exam_cla(eno,cno) values <foreach collection="cnos" item="cla" 
+		separator="," close=";"> (#{cno},${cla.cno}) </foreach> </insert> -->
+
+	<!--查询最大id -->
+	<select id="selectMaxExamId" resultType="int">
+		select MAX(id) from exam
+	</select>
+	<select id="selectClasses" resultType="Classes">
+		select * from classes where 1=1
+		<if test="c.cname != null and c.cname !=''">and cname like #{c.cname}</if>
+	</select>
+	<select id="selectEnoSno" resultType="int">
+		select count(*) from
+		exam_stu where eno=#{eno} and sno=#{sno}
+	</select>
+	<select id="listEstus" resultType="Student">
+		select s.*,LAY_CHECKED from
+		student s,exam_stu es where s.sno=es.sno and eno=#{eno} limit
+		#{offset},#{limit}
+	</select>
+	<select id="selectStuTotal" resultType="int">
+		select count(*) from
+		student;
+	</select>
+	<select id="listEstu" resultType="Student">
+		select * from student limit
+		#{offset},#{limit}
+	</select>
+	<select id="questionlistLC" resultType="Student">
+		select s.*,LAY_CHECKED
+		from student s,exam_stu es where s.sno=es.sno and eno=#{eno} and
+		sclass=#{sclass} limit #{offset},#{limit}
+	</select>
+	<insert id="insertEXamStu">
+		insert into exam_stu(eno,sno,LAY_CHECKED) values(#{eno},#{sno},'false')
+	</insert>
+	<update id="updateExamStu">
+		update exam_stu set LAY_CHECKED=#{LAY_CHECKED} where
+		eno=#{eno} and sno=#{sno}
+	</update>
+	<delete id="deleteSstu">
+	DELETE FROM exam_stu WHERE eno=#{eno} AND sno IN(${snos})
+	</delete>
+	<delete id="deleteOstu">
+	 delete from exam_stu where eno=#{eno} and sno=#{sno}
+	</delete>
+	
+	<select id="selectEstu" resultType="Student">
+	    select s.sno,s.sname,s.sclass from student s,exam_stu es where s.sno=es.sno and es.eno=#{eno} and LAY_CHECKED='true'
+	    limit #{offset},#{limit}
+	</select>
+	<select id="selectEstuTotal" resultType="int">
+		select count(*) from exam_stu es where es.eno=#{eno} and LAY_CHECKED='true'
+	</select>
+	<select id="selectTeacher" resultType="Teacher">
+		select * from teacher
+	</select>
+	<select id="selectExamStu" resultType="Student">
+	    select s.sno,s.sname,s.sclass from student s,exam_stu es where s.sno=es.sno and es.eno=#{eno} and LAY_CHECKED='true'
+	    limit #{offset},#{limit}
+	</select>
+</mapper>

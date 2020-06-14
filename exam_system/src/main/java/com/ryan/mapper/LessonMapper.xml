@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ryan.mapper.LessonMapper">
+    <!--遍历课程-->
+	<select id="findless" resultType="Major">
+		select * from major order by mno desc limit #{offset},#{limit}
+		
+	</select>
+    <!--查询课程表行数-->
+    <select id="findtotalrow" resultType="int">
+        select count(*) from major 
+    </select>
+    <!--添加课程-->
+    <insert id="insertless" useGeneratedKeys="true">
+       insert into major (mno,mname,mlevel,mstem,mmodule) 
+       values(
+       #{major.mno},#{major.mname},#{major.mlevel},#{major.mstem},#{major.mmodule}
+       )
+    
+    </insert>
+    <!--删除课程（多）-->
+    <delete id="deleteless" parameterType="String">
+      delete from major where mno in (${mno})
+    </delete>
+    
+    <delete id="deletemajto" parameterType="String">
+      delete from maj_to where mno in (${mno})
+    </delete>
+    
+    <!--删除课程（单）-->
+    <delete id="deleteonemaj" parameterType="String">
+      delete from major where mno = #{mno}
+    </delete>
+    
+    <delete id="deleteonemajto" parameterType="String">
+      delete from maj_to where mno = #{mno}
+    </delete>
+    
+    <!--修改前查询-->
+    <select id="selectless" resultType="Major">
+      select * from major where id = #{id}
+    </select>
+    
+    <!--修改课程-->
+    <update id="updateless" parameterType="Major">
+     update major 
+     set
+     mno =  #{major.mno},
+     mname = #{major.mname},
+     mlevel = #{major.mlevel},
+     mstem = #{major.mstem},
+     mmodule = #{major.mmodule}
+     
+     where id = #{major.id} 
+    
+    </update>
+    
+    <!--试题条件查询-->
+	<select id="selectlesson" resultType="Major" parameterType="Major" >
+		select * from major where 1=1
+		<if test="major.mname != null and major.mname !=''">and mname like #{major.mname}</if>
+		<if test="major.mmodule != null and major.mmodule !=''">and mmodule like #{major.mmodule}</if>
+		<if test="major.mlevel != null and major.mlevel !=''">and mlevel like #{major.mlevel}</if>
+		<if test="major.mstem != null and major.mstem !=''">and mstem like #{major.mstem}</if>
+		order by mno desc
+	</select> 
+	<!--遍历知识点-->
+	<select id="selecttopic" resultType="Topic">
+	select * from topic 
+	</select>
+	
+	<!--查询要添加知识点-->
+	<select id="seachtopic" parameterType="String"  resultType="Topic">
+	   select * from topic where tono in (#{ids})    
+	</select>
+	
+	<!--添加课程知识点-->
+	<insert id="inserttop" >
+        insert into maj_to(mno,tono) values
+        <foreach collection="top" item="top" separator="," close=";">
+            (#{major.mno},${top.tono})
+        </foreach>
+    </insert>
+    
+    <!--查询最大id-->
+    <select id="selectMaxlessonId" resultType="int">
+    select MAX(id) from major
+    </select>
+    
+      <!--查询课程的知识点-->
+      <select id="findmajto" parameterType="String" resultType="String">
+           select m.tono from maj_to m 
+           where
+           m.mno = #{mno}
+    </select>
+    <!--添加前查询-->
+    <select id="findtopic1" resultType="Topic">
+       select * from topic where tono in (${tono1})
+    </select>
+    <!--给课程添加知识点-->
+    <insert id="addmajto1">
+    insert into maj_to (mno,tono)
+    values
+    <foreach collection="tono" item="tono" separator="," close=";">
+            (#{mno},#{tono.tono})
+        </foreach>
+    </insert>
+    <!--更改知识点前删除-->
+    <delete id="deletemajto1">
+      delete from maj_to where mno = #{mno}
+    </delete>
+    
+    <!--删除前查看是否有值-->
+    <select id="selectmajto" resultType="Topic">
+      select t.* from maj_to m inner join topic t on m.tono = t.tono where mno = #{mno} 
+    </select>
+    
+</mapper>
